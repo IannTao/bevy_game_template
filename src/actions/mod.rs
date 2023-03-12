@@ -11,9 +11,9 @@ pub struct ActionsPlugin;
 // Actions can then be used as a resource in other systems to act on the player input.
 impl Plugin for ActionsPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Actions>().add_system(
-            set_movement_actions.in_set(OnUpdate(GameState::Playing))
-        );
+        app.init_resource::<Actions>()
+            .add_systems((set_movement_actions , back_menu).in_set(OnUpdate(GameState::Playing)));
+
     }
 }
 
@@ -34,5 +34,11 @@ pub fn set_movement_actions(mut actions: ResMut<Actions>, keyboard_input: Res<In
         actions.player_movement = Some(player_movement.normalize());
     } else {
         actions.player_movement = None;
+    }
+}
+
+fn back_menu(mut state: ResMut<NextState<GameState>>, input: Res<Input<KeyCode>>) {
+    if input.pressed(KeyCode::Escape) {
+        state.set(GameState::Menu)
     }
 }

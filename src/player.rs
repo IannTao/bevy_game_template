@@ -13,11 +13,13 @@ pub struct Player;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(spawn_player.in_schedule(OnEnter(GameState::Playing)))
-            .add_system(move_player.in_set(OnUpdate(GameState::Playing)));
+            .add_system(move_player.in_set(OnUpdate(GameState::Playing)))
+            .add_system(despawn_palyer.in_schedule(OnExit(GameState::Playing)));
     }
 }
 
 fn spawn_player(mut commands: Commands, textures: Res<TextureAssets>) {
+    commands.spawn(Camera2dBundle::default());
     commands
         .spawn(SpriteBundle {
             texture: textures.texture_bevy.clone(),
@@ -44,4 +46,13 @@ fn move_player(
     for mut player_transform in &mut player_query {
         player_transform.translation += movement;
     }
+}
+
+fn despawn_palyer(
+    mut commands: Commands,
+    player: Query<Entity, With<Player>>,
+    camera: Query<Entity, With<Camera2d>>,
+) {
+    commands.entity(player.single()).despawn();
+    commands.entity(camera.single()).despawn_recursive();
 }
